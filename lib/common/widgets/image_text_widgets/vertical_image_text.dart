@@ -7,13 +7,15 @@ import '../../../utlis/helpers/helper_functions.dart';
 class EVerticalImageText extends StatelessWidget {
   const EVerticalImageText({
     super.key, required this.title, required this.image, this.textColor = EColors
-        .white, this.backgroundColor, this.onTap,
+        .white, this.backgroundColor, this.onTap, this.isIcon = false,
   });
 
-  final String title, image;
+  final String title;
+  final dynamic image;
   final Color textColor;
   final Color? backgroundColor;
   final void Function()? onTap;
+  final bool? isIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -32,11 +34,12 @@ class EVerticalImageText extends StatelessWidget {
               decoration: BoxDecoration(
                 color: backgroundColor ?? (dark
                     ? EColors.black
-                    : EColors.white),
+                    : EColors.dermBrown.withValues(alpha: 0.5)),
                 borderRadius: BorderRadius.circular(100),
               ),
               child: Center(
-                child: Image(
+                child: isIcon! ? Icon(image, color: EColors.black,)              
+                : Image(
                   image: AssetImage(image),
                   fit: BoxFit.cover,
                   color: dark
@@ -49,7 +52,7 @@ class EVerticalImageText extends StatelessWidget {
               height: ESizes.spaceBtwItems / 2,
             ),
             SizedBox(
-              width: 55,
+              width: 70,
               child: Center(
                 child: Text(
                   title,
@@ -60,6 +63,7 @@ class EVerticalImageText extends StatelessWidget {
                       .apply(color: textColor),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+          
                 ),
               ),
             ),

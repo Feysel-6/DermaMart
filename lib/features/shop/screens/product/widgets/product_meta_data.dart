@@ -7,7 +7,6 @@ import '../../../../../common/widgets/texts/product_price_text.dart';
 import '../../../../../common/widgets/texts/product_title_text.dart';
 import '../../../../../utlis/constants/colors.dart';
 import '../../../../../utlis/constants/enums.dart';
-import '../../../../../utlis/constants/image_strings.dart';
 import '../../../../../utlis/constants/sizes.dart';
 import '../../../../../utlis/helpers/helper_functions.dart';
 
@@ -44,7 +43,7 @@ class EProductMetaData extends StatelessWidget {
         ),
         const SizedBox(height: ESizes.spaceBtwItems / 1.5,),
 
-        EProductTitleText(title: 'Green Nike Sports Shirt'),
+        EProductTitleText(title: 'Glycolic Acid 7% Exfoliating Toner | 23% Off in Slowvember'),
         const SizedBox(height: ESizes.spaceBtwItems / 1.5,),
 
         Row(
@@ -58,8 +57,15 @@ class EProductMetaData extends StatelessWidget {
 
         Row(
           children: [
-            ECircularImage(image: EImages.shoeIcon, width: 32, height: 32, overlayColor: dark ? EColors.white : EColors.black),
-            EBrandTitleWithVerifiedIcon(title: 'Nike', brandTextSize: TextSizes.medium,),
+            ECircularImage(
+              isNetworkImage: false,
+              image: "assets/icons/brands/rareBeauty.png",
+                width: 32, height: 32, overlayColor: dark ? EColors.white : EColors.black
+            ),
+            EBrandTitleWithVerifiedIcon(
+              title: 'Rare Beauty',
+              brandTextSize: TextSizes.medium,
+            ),
           ],
         ),
 

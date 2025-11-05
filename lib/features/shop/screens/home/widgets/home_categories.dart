@@ -1,75 +1,54 @@
+import 'package:dermamart/utlis/constants/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 
+import '../../../../../common/widgets/image_text_widgets/vertical_image_text.dart';
+
+
+final List<Map<String, dynamic>> categories = [
+  {'name': 'Skincare', 'icon': Iconsax.drop, 'color': EColors.dermPink},
+  {'name': 'Haircare', 'icon': Iconsax.scissor_1, 'color': EColors.dermBlue},
+  {'name': 'Bodycare', 'icon': Iconsax.brush_2, 'color': EColors.dermGreen},
+  {
+    'name': 'Sun Protection',
+    'icon': Iconsax.sun_1,
+    'color': EColors.dermYellow,
+  },
+  {'name': 'Acne Treatment', 'icon': Iconsax.scan, 'color': EColors.dermRed},
+  {'name': 'Anti-Aging', 'icon': Iconsax.clock, 'color': EColors.dermPurple},
+  {'name': 'Cleansers', 'icon': Iconsax.box_remove, 'color': EColors.dermSky},
+  {'name': 'Serums', 'icon': Iconsax.magic_star, 'color': EColors.dermOrange},
+  {'name': 'Masks', 'icon': Iconsax.mask, 'color': EColors.dermLavender},
+  {'name': 'Exfoliators', 'icon': Iconsax.refresh, 'color': EColors.dermMint},
+  {
+    'name': 'Toners',
+    'icon': Iconsax.colorfilter,
+    'color': EColors.dermLightBlue,
+  },
+ ];
 
 class EHomeCategories extends StatelessWidget {
   const EHomeCategories({
-    super.key, required this.categories,
+    super.key,
   });
 
-  final List<Map<String, dynamic>> categories;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Shop by Category',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
-          ),
-          const SizedBox(height: 15),
-          SizedBox(
-            height: 90,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final category = categories[index];
-                return Padding(
-                  padding: EdgeInsets.only(right: index == categories.length - 1 ? 0 : 12.0),
-                  child: _buildCategoryItem(context, category['name'], category['icon'], category['color']),
-                );
-              },
-            ),
-          ),
-        ],
+    return SizedBox(
+      height: 80,
+      child: ListView.builder(
+        itemCount: categories.length,
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (_, index) {
+          return EVerticalImageText(
+            isIcon: true,
+            image: categories[index]['icon'],
+            title: categories[index]['name'],
+            textColor: EColors.dark,
+            onTap: () {});
+        },
       ),
     );
   }
-
-  Widget _buildCategoryItem(BuildContext context, String name, IconData icon, Color color) {
-    return InkWell(
-      onTap: () {},
-      borderRadius: BorderRadius.circular(12.0),
-      child: Container(
-        width: 80,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 30, color: color),
-            const SizedBox(height: 5),
-            Text(
-              name,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.black87),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
 }

@@ -7,6 +7,7 @@ class EColors {
   static const Color primary = Color(0xFF4b68ff);
   static const Color secondary = Color(0xFFFFE24B);
   static const Color accent = Color(0xFFb0c7ff);
+  static const Color cream = Color(0xFFF5F5F5);
 
   static const Color dermPink = Color(0xFFFFC0CB); // Light Rose
   static const Color dermDark = Color(0xFFC084FC); // Violet/Lavender Accent

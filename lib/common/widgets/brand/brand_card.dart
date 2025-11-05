@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../utlis/constants/colors.dart';
 import '../../../utlis/constants/enums.dart';
-import '../../../utlis/constants/image_strings.dart';
 import '../../../utlis/constants/sizes.dart';
 import '../../../utlis/helpers/helper_functions.dart';
 import '../custom_shapes/containers/rounded_container.dart';
@@ -30,7 +29,7 @@ class EBrandCard extends StatelessWidget {
             Flexible(
               child: ECircularImage(
                 isNetworkImage: false,
-                image: EImages.clothIcon,
+                image: "assets/icons/brands/rareBeauty.png",
                 backgroundColor: Colors.transparent,
                 overlayColor:
                 dark ? EColors.white : EColors.black,
@@ -46,7 +45,7 @@ class EBrandCard extends StatelessWidget {
                 CrossAxisAlignment.start,
                 children: [
                   EBrandTitleWithVerifiedIcon(
-                    title: 'Nike',
+                    title: 'Rare Beauty',
                     brandTextSize: TextSizes.large,
                   ),
                   Text(

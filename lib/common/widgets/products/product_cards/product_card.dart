@@ -4,7 +4,6 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../../../features/shop/screens/product/product.dart';
 import '../../../../utlis/constants/colors.dart';
-import '../../../../utlis/constants/image_strings.dart';
 import '../../../../utlis/constants/sizes.dart';
 import '../../../../utlis/helpers/helper_functions.dart';
 import '../../../styles/shadows.dart';
@@ -41,7 +40,9 @@ class EProductCard extends StatelessWidget {
               child: Stack(
                 children: [
                   ERoundedImage(
-                    imageUrl: EImages.productImage1,
+                    imageUrl: "assets/images/products/glycirin.png",
+                    height: 300,
+                    width: 400,
                     applyImageRadius: true,
                   ),
                   Positioned(
@@ -80,43 +81,51 @@ class EProductCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   EProductTitleText(
-                    title: 'Green Nike Air Shoes',
+                    title: 'Glycolic Acid 7% Exfoliating Toner | 23% Off in Slowvember',
                   ),
-                  SizedBox(height: ESizes.spaceBtwItems / 2),
-                  EBrandTitleWithVerifiedIcon(title: 'Nike',),
+                  // SizedBox(height: ESizes.spaceBtwItems / 2),
+                  EBrandTitleWithVerifiedIcon(title: 'The Ordinary',),
                 ],
               ),
             ),
             //Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: ESizes.sm),
-                  child: EProductPriceText(price: '35.5',),
-                ),
-                Container(
-                  decoration: const BoxDecoration(
-                    color: EColors.dark,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(ESizes.cardRadiusMd),
-                      bottomRight: Radius.circular(
-                        ESizes.productImageRadius,
+            Container(
+              margin: const EdgeInsets.only(left: 7, right: 7),
+              decoration: BoxDecoration(
+                color: EColors.cream,
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(40),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: EProductPriceText(price: '35.5 USD    ',),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                          color: EColors.dark,
+                          borderRadius: BorderRadius.circular(50)
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: SizedBox(
+                          child: Center(
+                            child: const Icon(
+                              Iconsax.add,
+                              color: EColors.white,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  child: SizedBox(
-                    height: ESizes.iconLg * 1.2,
-                    width: ESizes.iconLg * 1.2,
-                    child: Center(
-                      child: const Icon(
-                        Iconsax.add,
-                        color: EColors.white,
-                      ),
-                    ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ],
         ),

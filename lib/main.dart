@@ -8,7 +8,7 @@ List<CameraDescription> cameras = [];
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  cameras = await availableCameras();
+  // cameras = await availableCameras();
   
   runApp(const App());
   

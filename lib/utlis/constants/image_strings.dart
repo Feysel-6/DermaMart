@@ -30,6 +30,7 @@ class EImages {
 
   // -- Brand Icons
   static const String nikeLogo = "assets/icons/brands/nike.png";
+  static const String rbLogo = "assets/icons/brands/rareBeauty.png";
   static const String adidasLogo = "assets/icons/brands/adidas-logo.png";
   static const String appleLogo = "assets/icons/brands/apple-logo.png";
   static const String jordanLogo = "assets/icons/brands/jordan-logo.png";
@@ -237,6 +238,7 @@ class EImages {
 
   //Profile
   static const String user = "assets/images/content/user.png";
+  static const String iman = "assets/images/content/iman.png";
 
   // -- Payment Methods
   static const String applePay = "assets/icons/payment_methods/apple-pay.png";

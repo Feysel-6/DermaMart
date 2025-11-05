@@ -1,6 +1,7 @@
 import 'package:dermamart/features/shop/screens/store/widgets/category_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../../../common/widgets/appbar/appbar.dart';
 import '../../../../common/widgets/appbar/tabbar.dart';
@@ -14,6 +15,28 @@ import '../../../../utlis/constants/sizes.dart';
 import '../../../../utlis/helpers/helper_functions.dart';
 import '../brand/all_brands.dart';
 
+final List<Map<String, dynamic>> categories = [
+  {'name': 'Skincare', 'icon': Iconsax.drop, 'color': EColors.dermPink},
+  {'name': 'Haircare', 'icon': Iconsax.scissor_1, 'color': EColors.dermBlue},
+  {'name': 'Bodycare', 'icon': Iconsax.brush_2, 'color': EColors.dermGreen},
+  {
+    'name': 'Sun Protection',
+    'icon': Iconsax.sun_1,
+    'color': EColors.dermYellow,
+  },
+  {'name': 'Acne Treatment', 'icon': Iconsax.scan, 'color': EColors.dermRed},
+  {'name': 'Anti-Aging', 'icon': Iconsax.clock, 'color': EColors.dermPurple},
+  {'name': 'Cleansers', 'icon': Iconsax.box_remove, 'color': EColors.dermSky},
+  {'name': 'Serums', 'icon': Iconsax.magic_star, 'color': EColors.dermOrange},
+  {'name': 'Masks', 'icon': Iconsax.mask, 'color': EColors.dermLavender},
+  {'name': 'Exfoliators', 'icon': Iconsax.refresh, 'color': EColors.dermMint},
+  {
+    'name': 'Toners',
+    'icon': Iconsax.colorfilter,
+    'color': EColors.dermLightBlue,
+  },
+];
+
 class StoreScreen extends StatelessWidget {
   const StoreScreen({super.key});
 
@@ -21,15 +44,12 @@ class StoreScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = EHelperFunctions.isDarkMode(context);
     return DefaultTabController(
-      length: 5,
+      length: categories.length,
       child: Scaffold(
         appBar: EAppBar(
           title: Text(
             'Store',
-            style: Theme
-                .of(context)
-                .textTheme
-                .headlineMedium,
+            style: Theme.of(context).textTheme.headlineMedium,
           ),
           actions: [ECartCounterIcon(onPressed: () {})],
         ),
@@ -42,63 +62,46 @@ class StoreScreen extends StatelessWidget {
                 floating: true,
                 backgroundColor: dark ? EColors.black : EColors.white,
                 expandedHeight: 400,
-
                 flexibleSpace: Padding(
-                  padding: EdgeInsets.all(ESizes.defaultSpace),
+                  padding: const EdgeInsets.all(ESizes.defaultSpace),
                   child: ListView(
                     shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     children: [
-                      SizedBox(height: ESizes.spaceBtwItems),
-                      ESearchContainer(
+                      const SizedBox(height: ESizes.spaceBtwItems),
+                      const ESearchContainer(
                         text: 'Search in Store',
                         showBorder: true,
                         showBackground: false,
                         padding: EdgeInsets.zero,
                       ),
-                      SizedBox(height: ESizes.spaceBtwItems),
-
+                      const SizedBox(height: ESizes.spaceBtwItems),
                       ESectionHeading(
                         title: 'Featured Brands',
-                        onPressed: () => Get.to(() => AllBrandsScreen()) ,
+                        onPressed: () => Get.to(() => const AllBrandsScreen()),
                       ),
                       const SizedBox(height: ESizes.spaceBtwItems / 1.5),
                       EGridLayout(
                         itemCount: 4,
                         mainAxisExtent: 80,
                         itemBuilder: (_, index) {
-                          return EBrandCard(showBorder: true);
+                          return const EBrandCard(showBorder: true);
                         },
                       ),
                     ],
                   ),
                 ),
-
                 bottom: ETabBar(
-                  tabs: const [
-                    Tab(child: Text('Sports')),
-                    Tab(child: Text('Furniture')),
-                    Tab(child: Text('Electronics')),
-                    Tab(child: Text('Clothes')),
-                    Tab(child: Text('Cosmetics')),
-                  ],
+                  tabs: categories.map((cat) => Tab(text: cat['name'])).toList(),
                 ),
               ),
             ];
           },
           body: TabBarView(
-            children: [
-              ECategoryTab(),
-              ECategoryTab(),
-              ECategoryTab(),
-              ECategoryTab(),
-              ECategoryTab(),
-            ],
+            children: categories.map((_) => const ECategoryTab()).toList(),
           ),
         ),
       ),
     );
   }
 }
-
-

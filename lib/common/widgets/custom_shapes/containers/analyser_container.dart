@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
+import '../../../../features/shop/screens/skin_results/analysis_result.dart';
 import '../../../../utlis/constants/colors.dart';
 import 'analyzer_dialog.dart';
+import 'package:get/get.dart';
 
 class EAnalyserContainer extends StatefulWidget {
   const EAnalyserContainer({super.key});
@@ -21,9 +22,12 @@ class _EAnalyserContainerState extends State<EAnalyserContainer> {
       barrierDismissible: false,
       builder: (_) => AnalyzerDialog(
         onImageCaptured: (File image) {
-          setState(() {
-            _imageCaptured = image;
-          });
+          if (mounted) {
+            setState(() {
+              _imageCaptured = image;
+            });
+            Get.to(() => AnalysisResultScreen(imageCaptured: image));
+          }
         },
       ),
     );
@@ -111,7 +115,6 @@ class _EAnalyserContainerState extends State<EAnalyserContainer> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // Update the button to use the new dialog function
                     _buildCtaButton(context),
                   ],
                 ),

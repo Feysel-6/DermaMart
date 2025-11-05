@@ -6,7 +6,6 @@ import '../../../../common/widgets/appbar/appbar.dart';
 import '../../../../common/widgets/icons/e_circular_icon.dart';
 import '../../../../common/widgets/layout/grid_layout.dart';
 import '../../../../common/widgets/products/product_cards/product_card.dart';
-import '../../../../utlis/constants/sizes.dart';
 import '../home/home.dart';
 
 class WishlistScreen extends StatelessWidget {
@@ -30,7 +29,7 @@ class WishlistScreen extends StatelessWidget {
 
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(ESizes.defaultSpace),
+          padding: EdgeInsets.all(16),
           child: Column(
             children: [
               EGridLayout(

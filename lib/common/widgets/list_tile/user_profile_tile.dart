@@ -16,14 +16,14 @@ class EUserProfileTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: const ECircularImage(
-        image: EImages.user,
+        image: EImages.iman,
         width: 50,
         height: 50,
         padding: 0,
       ),
-      title: Text('Coded by Fe', style: Theme.of(context).textTheme.headlineSmall!.apply(color: EColors.white),),
-      subtitle: Text('feyselteshome05@gmail.com', style: Theme.of(context).textTheme.bodyMedium!.apply(color: EColors.white),),
-      trailing: IconButton(onPressed: () => Get.to(() => ProfileScreen()), icon: const Icon(Iconsax.edit, color: EColors.white,)),
+      title: Text('Iman Yilma', style: Theme.of(context).textTheme.headlineSmall!.apply(color: EColors.dark),),
+      subtitle: Text('emanyilma9@gmail.com', style: Theme.of(context).textTheme.bodyMedium!.apply(color: EColors.dark),),
+      trailing: IconButton(onPressed: () => Get.to(() => ProfileScreen()), icon: const Icon(Iconsax.edit, color: EColors.dark,)),
     );
   }
 }

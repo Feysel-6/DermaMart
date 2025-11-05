@@ -4,7 +4,6 @@ import '../../../../../common/widgets/brand/brand_showcase.dart';
 import '../../../../../common/widgets/layout/grid_layout.dart';
 import '../../../../../common/widgets/products/product_cards/product_card.dart';
 import '../../../../../common/widgets/texts/section_heading.dart';
-import '../../../../../utlis/constants/image_strings.dart';
 import '../../../../../utlis/constants/sizes.dart';
 
 class ECategoryTab extends StatelessWidget {
@@ -22,9 +21,9 @@ class ECategoryTab extends StatelessWidget {
             children: [
               EBrandShowcase(
                 images: [
-                  EImages.productImage3,
-                  EImages.productImage2,
-                  EImages.productImage1,
+                  "assets/images/products/glycirin.png",
+                  "assets/images/products/glycirin.png",
+                  "assets/images/products/glycirin.png",
                 ],
               ),
               const SizedBox(height: ESizes.spaceBtwItems),

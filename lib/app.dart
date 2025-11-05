@@ -2,7 +2,7 @@ import 'package:dermamart/routes/app_routes.dart';
 import 'package:dermamart/utlis/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'pages/introduction_animation/introduction_animation_screen.dart';
+import 'navigation_menu.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -14,7 +14,8 @@ class App extends StatelessWidget {
       themeMode: ThemeMode.system,
       theme: EAppTheme.lightTheme,
       darkTheme: EAppTheme.darkTheme,
-      home: const IntroductionAnimationScreen(),
+      home: const NavigationMenu(),
+      // home: const IntroductionAnimationScreen(),
       getPages: AppRoutes.pages,
     );
   }

@@ -1,5 +1,4 @@
 import 'package:dermamart/features/shop/screens/product/widgets/bottom_add_to_cart_widget.dart';
-import 'package:dermamart/features/shop/screens/product/widgets/product_attribute.dart';
 import 'package:dermamart/features/shop/screens/product/widgets/product_detail_image_slider.dart';
 import 'package:dermamart/features/shop/screens/product/widgets/product_meta_data.dart';
 import 'package:dermamart/features/shop/screens/product/widgets/rating_share_widget.dart';
@@ -38,17 +37,17 @@ class ProductDetainScreen extends StatelessWidget {
 
                   EProductMetaData(),
 
-                  EProductAttribute(),
-                  const SizedBox(height: ESizes.spaceBtwSections),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      child: Text("Checkout"),
-                    ),
-                  ),
-                  const SizedBox(height: ESizes.spaceBtwSections),
+                  //EProductAttribute(),
+                  // const SizedBox(height: ESizes.spaceBtwSections),
+                  //
+                  // SizedBox(
+                  //   width: double.infinity,
+                  //   child: ElevatedButton(
+                  //     onPressed: () {},
+                  //     child: Text("Checkout"),
+                  //   ),
+                  // ),
+                  const SizedBox(height: ESizes.spaceBtwSections / 2),
 
                   ESectionHeading(
                     title: 'Description',
@@ -65,7 +64,23 @@ class ProductDetainScreen extends StatelessWidget {
                     moreStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
                     lessStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
                   ),
-                  
+                  const SizedBox(height: ESizes.spaceBtwSections / 2),
+                  ESectionHeading(
+                    title: 'Ingredients',
+                    showActionButton: false,
+                  ),
+                  const SizedBox(height: ESizes.spaceBtwItems),
+
+                  const ReadMoreText(
+                    'Water (Aqua), Glycerin, Niacinamide, Cetyl Alcohol, Stearic Acid, Dimethicone, Shea Butter, Cetearyl Alcohol, Panthenol, Tocopheryl Acetate (Vitamin E), Fragrance (Parfum), Phenoxyethanol, Ethylhexylglycerin.',
+                    trimLines: 2,
+                    trimMode: TrimMode.Line,
+                    trimCollapsedText: ' Show more ',
+                    trimExpandedText: ' Less',
+                    moreStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+                    lessStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+                  ),
+
                   const Divider(),
                   const SizedBox(height: ESizes.spaceBtwItems,),
                   Row(
