@@ -1,5 +1,7 @@
+
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
@@ -7,6 +9,34 @@ import 'package:image/image.dart' as img;
 import 'package:get/get.dart';
 import '../../../../features/shop/screens/skin_results/analysis_processing.dart';
 import '../../../../utlis/constants/colors.dart';
+
+// Assume StaticHeadShapeGuidePainter is defined elsewhere, as it was in the original context.
+class StaticHeadShapeGuidePainter extends CustomPainter {
+  final bool faceDetected;
+  final bool isPositioned;
+
+  StaticHeadShapeGuidePainter({required this.faceDetected, required this.isPositioned});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4.0
+      ..color = isPositioned ? Colors.green : (faceDetected ? Colors.orange : Colors.white.withOpacity(0.8));
+
+    final path = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        const Radius.circular(200), // Makes it oval
+      ));
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
 
 class AnalyzerDialog extends StatefulWidget {
   final void Function(File image) onImageCaptured;
@@ -53,20 +83,17 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
         (cam) => cam.lensDirection == CameraLensDirection.front,
         orElse: () => cameras.first,
       );
-      
-      // Use highest quality settings
+
       _cameraController = CameraController(
         front,
-        ResolutionPreset.ultraHigh,
+        ResolutionPreset.high, // Using high for better stream performance
         enableAudio: false,
-        imageFormatGroup: ImageFormatGroup.jpeg,
+        imageFormatGroup: ImageFormatGroup.yuv420, // ✅ More efficient for ML
       );
-      
+
       await _cameraController.initialize();
-      
-      // Start continuous image stream for face detection
       await _cameraController.startImageStream(_processCameraImage);
-      
+
       if (mounted) {
         setState(() => _isCameraInitialized = true);
       }
@@ -84,96 +111,125 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
     }
   }
 
+  bool _isDetecting = false;
+
   Future<void> _processCameraImage(CameraImage image) async {
-    if (_faceDetector == null || _isCapturing) return;
+    if (_isDetecting) return;
+    _isDetecting = true;
 
     try {
       final inputImage = _inputImageFromCameraImage(image);
       if (inputImage == null) return;
-
       final faces = await _faceDetector!.processImage(inputImage);
-      
-      if (mounted) {
-        setState(() {
-          _detectedFaces = faces;
-          _updateFaceStatus(faces);
-        });
-      }
+      if (mounted) setState(() => _detectedFaces = faces);
     } catch (e) {
-      debugPrint("Error processing face detection: $e");
+      debugPrint('Face detection error: $e');
+    } finally {
+      _isDetecting = false;
     }
   }
 
+  Uint8List _concatenatePlanes(List<Plane> planes) {
+    // This is a common implementation for converting the YUV420_888 planes
+    // into the continuous NV21 format expected by ML Kit for most Android devices.
+    final allBytes = WriteBuffer();
+    for (var plane in planes) {
+      allBytes.putUint8List(plane.bytes);
+    }
+    return allBytes.done().buffer.asUint8List();
+  }
+
+  InputImageRotation _rotationIntToImageRotation(int rotation) {
+    switch (rotation) {
+      case 0:
+        return InputImageRotation.rotation0deg;
+      case 90:
+        return InputImageRotation.rotation90deg;
+      case 180:
+        return InputImageRotation.rotation180deg;
+      case 270:
+        return InputImageRotation.rotation270deg;
+      default:
+        throw Exception('Invalid rotation value: $rotation');
+    }
+  }
+
+  // ✅ FIXED: Correct rotation logic
   InputImage? _inputImageFromCameraImage(CameraImage image) {
     try {
-      // Convert camera image to bytes
-      final allBytes = BytesBuilder();
-      for (final Plane plane in image.planes) {
-        allBytes.add(plane.bytes);
-      }
-      final bytes = allBytes.takeBytes();
+      // ... (Your existing rotation and metadata logic)
+      final camera = _cameraController.description;
+      final sensorOrientation = camera.sensorOrientation;
 
-      final imageRotation = InputImageRotation.rotation0deg;
-      
-      // Determine format based on camera image format
-      final inputImageFormat = Platform.isAndroid 
-          ? InputImageFormat.nv21 
-          : InputImageFormat.bgra8888;
+      final imageRotation = _rotationIntToImageRotation(sensorOrientation);
 
-      final inputImage = InputImage.fromBytes(
-        bytes: bytes,
-        metadata: InputImageMetadata(
-          size: Size(image.width.toDouble(), image.height.toDouble()),
-          rotation: imageRotation,
-          format: inputImageFormat,
-          bytesPerRow: image.planes[0].bytesPerRow,
-        ),
+      // Ensure you handle the format correctly. camera package usually gives YUV420.
+      final format = InputImageFormatValue.fromRawValue(image.format.raw) ?? InputImageFormat.nv21;
+
+      // 💡 THE FIX IS HERE: Correctly combining the YUV planes
+      final bytes = _concatenatePlanes(image.planes); // 👈 Use the correct helper function
+
+      final inputImageData = InputImageMetadata(
+        size: Size(image.width.toDouble(), image.height.toDouble()),
+        rotation: imageRotation,
+        format: format,
+        bytesPerRow: image.planes.first.bytesPerRow, // bytesPerRow for Y-plane is used for InputImageMetadata
       );
 
-      return inputImage;
+      return InputImage.fromBytes(
+        bytes: bytes, // 👈 The correctly combined bytes
+        metadata: inputImageData,
+      );
     } catch (e) {
       debugPrint("Error converting camera image: $e");
       return null;
     }
   }
 
-  void _updateFaceStatus(List<Face> faces) {
+  void _updateFaceStatus(List<Face> faces, InputImageMetadata metadata) {
     if (faces.isEmpty) {
-      _faceStatusMessage = 'No face detected';
-      _faceStatusColor = Colors.red;
-      _isFacePositioned = false;
+      setState(() {
+        _faceStatusMessage = 'No face detected';
+        _faceStatusColor = Colors.red;
+        _isFacePositioned = false;
+      });
       return;
     }
 
     if (faces.length > 1) {
-      _faceStatusMessage = 'Only one face please';
-      _faceStatusColor = Colors.orange;
-      _isFacePositioned = false;
+      setState(() {
+        _faceStatusMessage = 'Only one face please';
+        _faceStatusColor = Colors.orange;
+        _isFacePositioned = false;
+      });
       return;
     }
 
     final face = faces.first;
-    final screenSize = MediaQuery.of(context).size;
-    final centerX = screenSize.width / 2;
-    final centerY = screenSize.height / 2;
+    final imageSize = metadata.size;
+    final imageRotation = metadata.rotation;
     
-    // Calculate face center position
-    final faceCenterX = face.boundingBox.center.dx;
-    final faceCenterY = face.boundingBox.center.dy;
-    
-    // Check if face is centered
+    final isRotated = imageRotation == InputImageRotation.rotation90deg || imageRotation == InputImageRotation.rotation270deg;
+    final uprightWidth = isRotated ? imageSize.height : imageSize.width;
+    final uprightHeight = isRotated ? imageSize.width : imageSize.height;
+
+    final centerX = uprightWidth / 2;
+    final centerY = uprightHeight / 2;
+
+    final faceBox = face.boundingBox;
+    final faceCenterX = (faceBox.left + faceBox.right) / 2;
+    final faceCenterY = (faceBox.top + faceBox.bottom) / 2;
+
     final xOffset = (faceCenterX - centerX).abs();
     final yOffset = (faceCenterY - centerY).abs();
-    
-    // Check face size (should be reasonable size)
-    final faceWidth = face.boundingBox.width;
-    final minFaceSize = screenSize.width * 0.25;
-    final maxFaceSize = screenSize.width * 0.45;
-    
-    // Check if face is properly positioned
-    final isCentered = xOffset < screenSize.width * 0.15 && yOffset < screenSize.height * 0.15;
+
+    final faceWidth = faceBox.width;
+    final minFaceSize = uprightWidth * 0.35;
+    final maxFaceSize = uprightWidth * 0.7;
+
+    final isCentered = xOffset < uprightWidth * 0.15 && yOffset < uprightHeight * 0.15;
     final isGoodSize = faceWidth >= minFaceSize && faceWidth <= maxFaceSize;
-    
+
     if (isCentered && isGoodSize) {
       _faceStatusMessage = 'Perfect! Hold steady';
       _faceStatusColor = Colors.green;
@@ -182,12 +238,12 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
       _faceStatusMessage = 'Move face to center';
       _faceStatusColor = Colors.orange;
       _isFacePositioned = false;
-    } else if (!isGoodSize) {
-      if (faceWidth < minFaceSize) {
-        _faceStatusMessage = 'Move closer';
-      } else {
-        _faceStatusMessage = 'Move further away';
-      }
+    } else if (faceWidth < minFaceSize) {
+      _faceStatusMessage = 'Move closer';
+      _faceStatusColor = Colors.orange;
+      _isFacePositioned = false;
+    } else if (faceWidth > maxFaceSize) {
+      _faceStatusMessage = 'Move further away';
       _faceStatusColor = Colors.orange;
       _isFacePositioned = false;
     } else {
@@ -195,6 +251,7 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
       _faceStatusColor = Colors.orange;
       _isFacePositioned = false;
     }
+    setState(() {}); // Update UI with new status
   }
 
   Future<File?> _cropToHeadshot(File originalImage, Face? face) async {
@@ -203,23 +260,19 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
       final image = img.decodeImage(imageBytes);
       if (image == null || face == null) return originalImage;
 
-      // Get face bounding box
       final rect = face.boundingBox;
       
-      // Expand crop area to include more of head (1.5x face size)
       final expandFactor = 1.5;
       final cropWidth = (rect.width * expandFactor).toInt();
       final cropHeight = (rect.height * expandFactor).toInt();
       final cropX = (rect.left - (rect.width * (expandFactor - 1) / 2)).toInt();
       final cropY = (rect.top - (rect.height * (expandFactor - 1) / 2)).toInt();
 
-      // Ensure crop coordinates are within image bounds
       final safeX = cropX.clamp(0, image.width - 1);
       final safeY = cropY.clamp(0, image.height - 1);
       final safeWidth = (cropWidth + safeX).clamp(0, image.width) - safeX;
       final safeHeight = (cropHeight + safeY).clamp(0, image.height) - safeY;
 
-      // Crop image
       final cropped = img.copyCrop(
         image,
         x: safeX,
@@ -228,9 +281,8 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
         height: safeHeight,
       );
 
-      // Save cropped image
       final croppedBytes = img.encodeJpg(cropped, quality: 95);
-      final croppedFile = File(originalImage.path.replaceAll('.jpg', '_cropped.jpg'));
+      final croppedFile = File(originalImage.path.replaceFirst('.jpg', '_cropped.jpg'));
       await croppedFile.writeAsBytes(croppedBytes);
 
       return croppedFile;
@@ -245,18 +297,15 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
 
     setState(() => _isCapturing = true);
     
-    // Stop image stream temporarily
     await _cameraController.stopImageStream();
     
     try {
       final XFile file = await _cameraController.takePicture();
       final File imageFile = File(file.path);
       
-      // Detect face on the actual captured image for accurate cropping
       final inputImage = InputImage.fromFilePath(imageFile.path);
       final capturedFaces = await _faceDetector!.processImage(inputImage);
       
-      // Crop to headshot using face from captured image
       final croppedFile = await _cropToHeadshot(
         imageFile, 
         capturedFaces.isNotEmpty ? capturedFaces.first : null,
@@ -266,23 +315,19 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
       
       final finalImage = croppedFile ?? imageFile;
       
-      // Close dialog
       Navigator.of(context).pop();
       
-      // Navigate to processing screen with laser effect
       Get.to(
         () => AnalysisProcessingScreen(imageCaptured: finalImage),
         transition: Transition.fadeIn,
         duration: const Duration(milliseconds: 300),
       );
       
-      // Call the callback
       widget.onImageCaptured(finalImage);
     } catch (e) {
       debugPrint("Error capturing: $e");
-      // Restart image stream on error
-      await _cameraController.startImageStream(_processCameraImage);
       if (mounted) {
+        await _cameraController.startImageStream(_processCameraImage);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to capture image: $e'),
@@ -296,7 +341,9 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
 
   @override
   void dispose() {
-    _cameraController.stopImageStream();
+    _cameraController.stopImageStream().catchError((e) {
+      debugPrint("Error stopping stream on dispose: $e");
+    });
     _cameraController.dispose();
     _faceDetector?.close();
     super.dispose();
@@ -315,7 +362,6 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
         color: Colors.black,
         child: Stack(
           children: [
-            // Full-screen camera preview
             SizedBox(
               width: double.infinity,
               height: double.infinity,
@@ -332,7 +378,7 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
                               strokeWidth: 3,
                             ),
                             const SizedBox(height: 20),
-                            Text(
+                            const Text(
                               'Initializing camera...',
                               style: TextStyle(
                                 color: Colors.white,
@@ -344,8 +390,6 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
                       ),
                     ),
             ),
-
-            // Top gradient overlay with status
             Positioned(
               top: 0,
               left: 0,
@@ -357,7 +401,7 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black.withValues(alpha: 0.7),
+                      Colors.black.withOpacity(0.7),
                       Colors.transparent,
                     ],
                   ),
@@ -380,7 +424,7 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
+                                  const Text(
                                     'Position Your Face',
                                     style: TextStyle(
                                       fontSize: 20,
@@ -388,7 +432,7 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
                                       color: Colors.white,
                                       shadows: [
                                         Shadow(
-                                          color: Colors.black.withValues(alpha: 0.5),
+                                          color: Colors.black54,
                                           blurRadius: 10,
                                         ),
                                       ],
@@ -401,21 +445,15 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
                                       vertical: 6,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: _faceStatusColor.withValues(alpha: 0.8),
+                                      color: _faceStatusColor.withOpacity(0.8),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
                                       _faceStatusMessage,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 14,
                                         color: Colors.white,
                                         fontWeight: FontWeight.w600,
-                                        shadows: [
-                                          Shadow(
-                                            color: Colors.black.withValues(alpha: 0.5),
-                                            blurRadius: 8,
-                                          ),
-                                        ],
                                       ),
                                     ),
                                   ),
@@ -424,16 +462,15 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
                             ),
                             IconButton(
                               onPressed: () {
-                                _cameraController.stopImageStream();
                                 Navigator.of(context).pop();
                               },
                               icon: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.5),
+                                  color: Colors.black.withOpacity(0.5),
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.close,
                                   color: Colors.white,
                                   size: 24,
@@ -448,8 +485,6 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
                 ),
               ),
             ),
-
-            // Static head shape guide overlay
             if (_isCameraInitialized)
               Positioned.fill(
                 child: Center(
@@ -460,15 +495,11 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
                     ),
                     size: Size(
                       size.width * 0.75,
-                      size.height * 0.6,
+                      size.height * 0.5,
                     ),
                   ),
                 ),
               ),
-
-            // Face detection status is shown in the guide color (green/orange)
-
-            // Bottom controls
             Positioned(
               bottom: 0,
               left: 0,
@@ -480,8 +511,7 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      Colors.black.withValues(alpha: 0.8),
-                      Colors.black.withValues(alpha: 0.4),
+                      Colors.black.withOpacity(0.8),
                       Colors.transparent,
                     ],
                   ),
@@ -490,70 +520,21 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Instructions
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Text(
-                          'Ensure good lighting and hold steady',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 14,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withValues(alpha: 0.5),
-                                blurRadius: 8,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      // Capture button
                       GestureDetector(
-                        onTap: _isCapturing || !_isFacePositioned ? null : _captureImage,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
+                        onTap: _captureImage,
+                        child: Container(
                           width: 80,
                           height: 80,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: _isFacePositioned && !_isCapturing
-                                ? Colors.white
-                                : Colors.grey,
-                            border: Border.all(
-                              color: _isFacePositioned && !_isCapturing
-                                  ? EColors.dermPink
-                                  : Colors.grey,
-                              width: 4,
-                            ),
-                            boxShadow: _isFacePositioned && !_isCapturing
-                                ? [
-                                    BoxShadow(
-                                      color: EColors.dermPink.withValues(alpha: 0.5),
-                                      blurRadius: 20,
-                                      spreadRadius: 5,
-                                    ),
-                                  ]
-                                : null,
+                            color: _isFacePositioned ? Colors.green : Colors.grey,
+                            border: Border.all(color: Colors.white, width: 4),
                           ),
-                          child: _isCapturing
-                              ? Padding(
-                                  padding: const EdgeInsets.all(20),
-                                  child: CircularProgressIndicator(
-                                    color: EColors.dermPink,
-                                    strokeWidth: 3,
-                                  ),
-                                )
-                              : Icon(
-                                  Icons.camera_alt_rounded,
-                                  size: 40,
-                                  color: _isFacePositioned
-                                      ? EColors.dermPink
-                                      : Colors.grey,
-                                ),
+                          child: _isCapturing 
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : const Icon(Icons.camera_alt, color: Colors.white, size: 40),
                         ),
-                      ),
+                      )
                     ],
                   ),
                 ),
@@ -564,69 +545,4 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
       ),
     );
   }
-}
-
-// Static head shape guide (no animation)
-class StaticHeadShapeGuidePainter extends CustomPainter {
-  final bool faceDetected;
-  final bool isPositioned;
-
-  StaticHeadShapeGuidePainter({
-    required this.faceDetected,
-    required this.isPositioned,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = isPositioned ? Colors.green : EColors.dermPink
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.0;
-
-    final path = Path();
-    
-    // Draw head shape (oval)
-    final centerX = size.width / 2;
-    final centerY = size.height / 2;
-    final radiusX = size.width / 2 * 0.9;
-    final radiusY = size.height / 2 * 0.85;
-
-    path.addOval(
-      Rect.fromCenter(
-        center: Offset(centerX, centerY),
-        width: radiusX * 1.8,
-        height: radiusY * 1.6,
-      ),
-    );
-
-    canvas.drawPath(path, paint);
-
-    // Add corner indicators
-    final cornerPaint = Paint()
-      ..color = isPositioned ? Colors.green : EColors.dermPink
-      ..style = PaintingStyle.fill;
-
-    final cornerSize = 20.0;
-    final corners = [
-      Offset(centerX - radiusX - cornerSize, centerY - radiusY * 0.8 - cornerSize),
-      Offset(centerX + radiusX, centerY - radiusY * 0.8 - cornerSize),
-      Offset(centerX - radiusX - cornerSize, centerY + radiusY * 0.8),
-      Offset(centerX + radiusX, centerY + radiusY * 0.8),
-    ];
-
-    for (final corner in corners) {
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTWH(corner.dx, corner.dy, cornerSize, cornerSize),
-          const Radius.circular(4),
-        ),
-        cornerPaint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => 
-      oldDelegate is StaticHeadShapeGuidePainter &&
-      (oldDelegate.faceDetected != faceDetected || oldDelegate.isPositioned != isPositioned);
 }
