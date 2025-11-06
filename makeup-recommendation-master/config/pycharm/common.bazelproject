@@ -1,0 +1,20 @@
+directories:
+  # Add the directories you want added as source here
+  config
+  automakeup
+  climakeup
+  imagine
+  webmakeup
+  jupyter
+  preprocessing
+  ganette
+  modelutils
+  third_party/conda
+  third_party/faceparsing
+  third_party/mtcnn
+  third_party/facenet
+
+# Automatically includes all relevant targets under the 'directories' above
+derive_targets_from_directories: true
+
+workspace_type: python

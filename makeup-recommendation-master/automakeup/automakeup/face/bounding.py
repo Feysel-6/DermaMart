@@ -1,0 +1,43 @@
+from abc import ABC, abstractmethod
+
+import numpy as np
+
+from imagine.functional import functional as f
+from imagine.shape.figures import Rect
+
+
+class BoundingBoxFinder(ABC):
+    @abstractmethod
+    def find(self, img):
+        return NotImplemented
+
+
+class DlibBoundingBoxFinder(BoundingBoxFinder):
+    def __init__(self):
+        super().__init__()
+        try:
+            import dlib
+        except ImportError:
+            raise ImportError("dlib is required for DlibBoundingBoxFinder. Install it with: pip install dlib (requires CMake)")
+        self.detector = dlib.get_frontal_face_detector()
+
+    def find(self, img):
+        bbs = self.detector(img, 1)
+        if len(bbs) == 0:
+            return None
+        biggest_bb = max(bbs, key=lambda rect: rect.width() * rect.height())
+        return Rect.from_dlib(biggest_bb)
+
+
+class MTCNNBoundingBoxFinder(BoundingBoxFinder):
+    def __init__(self, mtcnn):
+        super().__init__()
+        self.mtcnn = mtcnn
+
+    def find(self, img):
+        img = f.Rearrange("h w c -> 1 h w c")(img)
+        bbs, _ = self.mtcnn.find(img)
+        if bbs[0] is None or bbs[0].size == 0:
+            return None
+        best_face_bb = bbs[0][0]
+        return Rect(best_face_bb[1], best_face_bb[3], best_face_bb[0], best_face_bb[2])
