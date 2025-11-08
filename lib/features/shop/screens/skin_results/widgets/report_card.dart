@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import '../../../../../common/widgets/layout/grid_layout.dart';
 import '../../../../../common/widgets/products/product_cards/product_card.dart';
+import '../../../../../common/widgets/shimmers/vertical_product_shimmer.dart';
 import '../../../../../common/widgets/texts/section_heading.dart';
 import '../../../../../data/controller/product_controller.dart';
 import '../../../../../utlis/constants/fitness_app_theme.dart';
@@ -70,7 +71,13 @@ class CurvePainter extends CustomPainter {
   }
 }
 
-// --- 3. Extracted and Modified Widget (MediterranesnDietView) ---
+List<String> skinHealth = ['Good', 'Bad', 'Excellent'];
+List<String> skinType = ['Dry', 'Oily', 'Combination', 'Normal'];
+Map<int, String> description = {
+  1: 'Your skin analysis shows a balanced complexion with moderate hydration and slight o.iliness in the T-zone. Overall texture is smooth with mild unevenness on the forehead. Light pigmentation and small pores are visible but manageable. Your skin health is good—maintain hydration, gentle cleansing, and daily sunscreen to keep it glowing.',
+  2: 'Your skin analysis shows a poor hydration. you are prone to acne and pores were really tight',
+  3: 'Your skin is glowing, everything feels smooth, the pores are open and there is even distrubition of your skin. That\'s excellent keep the products below to maintaine it. ',
+};
 
 class DietSummaryCard extends StatelessWidget {
   final AnimationController? animationController;
@@ -757,6 +764,7 @@ class DietSummaryCard extends StatelessWidget {
                     ),
                   ),
                 ),
+
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -766,13 +774,25 @@ class DietSummaryCard extends StatelessWidget {
                         title: 'Recommended Products',
                         onPressed: () => Get.to(() => const AllProducts()),
                       ),
-                      // EGridLayout(
-                      //   itemCount: 4,
-                      //   itemBuilder: (_, index) => const EProductCard(),
-                      // ),
+                      Obx(
+                              () {
+                            if (controller.isLoading.value) {
+                              return const EVerticalProductShimmer();
+                            }
+                            if (controller.recommendedProducts.isEmpty) {
+                              return Center(child: Text('No products found!', style: Theme.of(context).textTheme.titleMedium,),);
+                            } else {
+                              return EGridLayout(
+                                itemCount: controller.featuredProducts.length,
+                                itemBuilder: (_, index) => EProductCard(product: controller.recommendedProducts[index]),
+                              );
+                            }
+                          }
+                      ),
                     ],
                   ),
                 ),
+
               ],
             ),
           ),

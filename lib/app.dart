@@ -1,3 +1,4 @@
+import 'package:dermamart/pages/introduction_animation/introduction_animation_screen.dart';
 import 'package:dermamart/routes/app_routes.dart';
 import 'package:dermamart/utlis/theme/theme.dart';
 import 'package:flutter/material.dart';
@@ -14,8 +15,8 @@ class App extends StatelessWidget {
       themeMode: ThemeMode.system,
       theme: EAppTheme.lightTheme,
       darkTheme: EAppTheme.darkTheme,
-      home: const NavigationMenu(),
-      // home: const IntroductionAnimationScreen(),
+      // home: const NavigationMenu(),
+      home: const IntroductionAnimationScreen(),
       getPages: AppRoutes.pages,
     );
   }

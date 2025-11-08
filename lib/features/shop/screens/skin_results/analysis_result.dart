@@ -8,8 +8,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../common/widgets/appbar/appbar.dart';
+import '../../../../common/widgets/layout/grid_layout.dart';
+import '../../../../common/widgets/products/product_cards/product_card.dart';
+import '../../../../common/widgets/shimmers/vertical_product_shimmer.dart';
+import '../../../../common/widgets/texts/section_heading.dart';
+import '../../../../data/controller/product_controller.dart';
 import '../../../../utlis/constants/colors.dart';
 import 'package:flutter/services.dart';
+
+import '../all_products/all_products.dart';
 
 class AnalysisResultScreen extends StatefulWidget {
   const AnalysisResultScreen({
@@ -59,7 +66,6 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen>
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
     );
-
     return Scaffold(
       backgroundColor: EColors.dermBg,
       appBar: EAppBar(
@@ -100,6 +106,9 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen>
                 animationController: _animationController,
                 animation: _animation,
               ),
+
+
+
             ],
           ),
         ),

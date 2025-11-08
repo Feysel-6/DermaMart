@@ -10,7 +10,7 @@ class ProductRepository extends GetxController {
 
   final _db = Supabase.instance.client;
 
-  Future<List<ProductModel>> getAllProducts() async {
+  Future<List<ProductModel>> fetchAllProducts() async {
     try {
       final response = await _db.from('products').select();
 
@@ -26,42 +26,20 @@ class ProductRepository extends GetxController {
       throw Exception('Something went wrong: $e');
     }
   }
-}
+  Future<List<ProductModel>> fetchRecommendedProducts([String skinType = 'dry']) async {
+    try {
+      final response = await _db.from('products').select().eq('skin', skinType);
 
-// Future<List<ProductModel>> fetchFeaturedProducts() async {
-//   try {
-//     final response = await _db
-//         .from('products')
-//         .select('''
-//           *,
-//           brand:brands(id, name, image)
-//         ''')
-//         .eq('is_featured', true).limit(6);
-//
-//     final rows = response as List;
-//
-//     return rows.map((raw) {
-//       Map<String, dynamic>? brand;
-//       final rawBrand = raw['brand'];
-//       if (rawBrand != null) {
-//         if (rawBrand is List && rawBrand.isNotEmpty) {
-//           brand = Map<String, dynamic>.from(rawBrand[0] as Map);
-//         } else if (rawBrand is Map) {
-//           brand = Map<String, dynamic>.from(rawBrand);
-//         }
-//       }
-//
-//       // Build a cleaned map for ProductModel.fromMap()
-//       final cleaned = {
-//         ...Map<String, dynamic>.from(raw as Map),
-//         'brand': brand,
-//       };
-//
-//       return ProductModel.fromMap(cleaned);
-//     }).toList();
-//   } on PostgrestException catch (e) {
-//     throw Exception('Database Error: ${e.message}');
-//   } catch (e) {
-//     throw Exception('Something went wrong: $e');
-//   }
-// }
+      final rows = response as List;
+
+      return rows.map((raw) {
+        final cleaned = Map<String, dynamic>.from(raw as Map);
+        return ProductModel.fromMap(cleaned);
+      }).toList();
+    } on PostgrestException catch (e) {
+      throw Exception('Database Error: ${e.message}');
+    } catch (e) {
+      throw Exception('Something went wrong: $e');
+    }
+  }
+}
