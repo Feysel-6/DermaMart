@@ -6,11 +6,17 @@ import 'analysis_result.dart';
 
 class AnalysisProcessingScreen extends StatefulWidget {
   final File imageCaptured;
+  final String? skinType;
 
-  const AnalysisProcessingScreen({super.key, required this.imageCaptured});
+  const AnalysisProcessingScreen({
+    super.key,
+    required this.imageCaptured,
+    this.skinType,
+  });
 
   @override
-  State<AnalysisProcessingScreen> createState() => _AnalysisProcessingScreenState();
+  State<AnalysisProcessingScreen> createState() =>
+      _AnalysisProcessingScreenState();
 }
 
 class _AnalysisProcessingScreenState extends State<AnalysisProcessingScreen>
@@ -29,46 +35,38 @@ class _AnalysisProcessingScreenState extends State<AnalysisProcessingScreen>
   }
 
   void _initializeAnimations() {
-    // Laser scanning animation
     _laserController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     );
     _laserAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _laserController,
-        curve: Curves.linear,
-      ),
+      CurvedAnimation(parent: _laserController, curve: Curves.linear),
     );
     _laserController.repeat();
 
-    // Progress animation
     _progressController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 10),
     );
     _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _progressController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _progressController, curve: Curves.easeInOut),
     );
 
     _progressController.addListener(() {
-      setState(() {
-        _progress = _progressAnimation.value;
-      });
+      setState(() => _progress = _progressAnimation.value);
     });
   }
 
   void _startAnalysis() {
     _progressController.forward();
-    
-    // Navigate to result screen after 10 seconds
+
     Future.delayed(const Duration(seconds: 10), () {
       if (mounted) {
         Get.off(
-          () => AnalysisResultScreen(imageCaptured: widget.imageCaptured),
+              () => AnalysisResultScreen(
+            imageCaptured: widget.imageCaptured,
+            skinType: widget.skinType,
+          ),
           transition: Transition.fadeIn,
           duration: const Duration(milliseconds: 300),
         );
@@ -86,27 +84,17 @@ class _AnalysisProcessingScreenState extends State<AnalysisProcessingScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
-        children: [
-          // Background image
+        children: [ // <-- Missing '[' for the children list
           Positioned.fill(
-            child: Image.file(
-              widget.imageCaptured,
-              fit: BoxFit.cover,
-            ),
+            child: Image.file(widget.imageCaptured, fit: BoxFit.cover),
           ),
-
-          // Dark overlay
           Positioned.fill(
-            child: Container(
-              color: Colors.black.withValues(alpha: 0.6),
-            ),
+            child: Container(color: Colors.black.withOpacity(0.6)),
           ),
-
-          // Laser scanning effect
           AnimatedBuilder(
             animation: _laserAnimation,
             builder: (context, child) {
@@ -119,8 +107,6 @@ class _AnalysisProcessingScreenState extends State<AnalysisProcessingScreen>
               );
             },
           ),
-
-          // Content overlay
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -128,10 +114,10 @@ class _AnalysisProcessingScreenState extends State<AnalysisProcessingScreen>
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.8),
+                    Colors.black.withOpacity(0.8),
                     Colors.transparent,
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.8),
+                    Colors.black.withOpacity(0.8),
                   ],
                   stops: const [0.0, 0.2, 0.8, 1.0],
                 ),
@@ -140,16 +126,12 @@ class _AnalysisProcessingScreenState extends State<AnalysisProcessingScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Analysis icon
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: EColors.dermPink.withValues(alpha: 0.2),
+                        color: EColors.dermPink.withOpacity(0.2),
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: EColors.dermPink,
-                          width: 3,
-                        ),
+                        border: Border.all(color: EColors.dermPink, width: 3),
                       ),
                       child: Icon(
                         Icons.face_retouching_natural,
@@ -158,39 +140,25 @@ class _AnalysisProcessingScreenState extends State<AnalysisProcessingScreen>
                       ),
                     ),
                     const SizedBox(height: 40),
-                    
-                    // Analysis text
-                    Text(
+                    const Text(
                       'Analyzing Your Skin',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withValues(alpha: 0.5),
-                            blurRadius: 10,
-                          ),
-                        ],
+                        shadows: [Shadow(color: Colors.black54, blurRadius: 10)],
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text(
+                    const Text(
                       'Please wait while we scan your face...',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.white.withValues(alpha: 0.9),
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withValues(alpha: 0.5),
-                            blurRadius: 8,
-                          ),
-                        ],
+                        color: Colors.white70,
+                        shadows: [Shadow(color: Colors.black54, blurRadius: 8)],
                       ),
                     ),
                     const SizedBox(height: 60),
-                    
-                    // Progress bar
                     Container(
                       margin: const EdgeInsets.symmetric(horizontal: 40),
                       child: Column(
@@ -200,23 +168,18 @@ class _AnalysisProcessingScreenState extends State<AnalysisProcessingScreen>
                             child: LinearProgressIndicator(
                               value: _progress,
                               minHeight: 8,
-                              backgroundColor: Colors.white.withValues(alpha: 0.2),
-                              valueColor: AlwaysStoppedAnimation<Color>(EColors.dermPink),
+                              backgroundColor: Colors.white.withOpacity(0.2),
+                              valueColor: const AlwaysStoppedAnimation<Color>(EColors.dermPink),
                             ),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             '${(_progress * 100).toInt()}%',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black.withValues(alpha: 0.5),
-                                  blurRadius: 8,
-                                ),
-                              ],
+                              shadows: [Shadow(color: Colors.black54, blurRadius: 8)],
                             ),
                           ),
                         ],
@@ -226,14 +189,13 @@ class _AnalysisProcessingScreenState extends State<AnalysisProcessingScreen>
                 ),
               ),
             ),
-          ),
+          ), // <-- Missing ')' for Positioned.fill
         ],
-      ),
+      ), // <-- Missing ')' for Stack
     );
   }
 }
 
-// Custom painter for laser scanning effect
 class LaserScanPainter extends CustomPainter {
   final double laserY;
 
@@ -241,43 +203,31 @@ class LaserScanPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Draw laser line
     final paint = Paint()
-      ..color = EColors.dermPink.withValues(alpha: 0.8)
+      ..color = EColors.dermPink.withOpacity(0.8)
       ..strokeWidth = 3.0
       ..style = PaintingStyle.stroke
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
 
-    // Main laser line
-    canvas.drawLine(
-      Offset(0, laserY),
-      Offset(size.width, laserY),
-      paint,
-    );
+    canvas.drawLine(Offset(0, laserY), Offset(size.width, laserY), paint);
 
-    // Gradient effect above and below laser
     final gradientPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
           Colors.transparent,
-          EColors.dermPink.withValues(alpha: 0.3),
-          EColors.dermPink.withValues(alpha: 0.5),
-          EColors.dermPink.withValues(alpha: 0.3),
+          EColors.dermPink.withOpacity(0.3),
+          EColors.dermPink.withOpacity(0.5),
+          EColors.dermPink.withOpacity(0.3),
           Colors.transparent,
         ],
         stops: const [0.0, 0.3, 0.5, 0.7, 1.0],
-      ).createShader(
-        Rect.fromLTWH(0, laserY - 50, size.width, 100),
-      );
+      ).createShader(Rect.fromLTWH(0, laserY - 50, size.width, 100));
 
     canvas.drawRect(
-      Rect.fromLTWH(0, laserY - 50, size.width, 100),
-      gradientPaint,
-    );
+        Rect.fromLTWH(0, laserY - 50, size.width, 100), gradientPaint);
 
-    // Scanning dots
     final dotPaint = Paint()
       ..color = EColors.dermPink
       ..style = PaintingStyle.fill;
@@ -285,11 +235,7 @@ class LaserScanPainter extends CustomPainter {
     final dotSpacing = size.width / 8;
     for (int i = 0; i < 8; i++) {
       final x = i * dotSpacing + dotSpacing / 2;
-      canvas.drawCircle(
-        Offset(x, laserY),
-        5,
-        dotPaint,
-      );
+      canvas.drawCircle(Offset(x, laserY), 5, dotPaint);
     }
   }
 
@@ -297,4 +243,3 @@ class LaserScanPainter extends CustomPainter {
   bool shouldRepaint(covariant LaserScanPainter oldDelegate) =>
       oldDelegate.laserY != laserY;
 }
-

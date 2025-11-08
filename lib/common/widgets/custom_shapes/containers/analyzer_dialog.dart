@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:get/get.dart';
 import '../../../../features/shop/screens/skin_results/analysis_processing.dart';
+import '../../../../services/api_service.dart';
 import '../../../../utlis/constants/colors.dart';
 
 // Assume StaticHeadShapeGuidePainter is defined elsewhere, as it was in the original context.
@@ -45,6 +46,7 @@ class AnalyzerDialog extends StatefulWidget {
 
 class _AnalyzerDialogState extends State<AnalyzerDialog> {
   late CameraController _cameraController;
+  final ApiService _apiService = ApiService();
   bool _isCameraInitialized = false;
   bool _isCapturing = false;
 
@@ -58,7 +60,7 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
     try {
       final cameras = await availableCameras();
       final front = cameras.firstWhere(
-        (cam) => cam.lensDirection == CameraLensDirection.front,
+            (cam) => cam.lensDirection == CameraLensDirection.front,
         orElse: () => cameras.first,
       );
 
@@ -91,23 +93,24 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
     if (!_isCameraInitialized || _isCapturing) return;
 
     setState(() => _isCapturing = true);
-    
+
     try {
       final XFile file = await _cameraController.takePicture();
       final File imageFile = File(file.path);
-      
+      final String? skinType = await _apiService.getSkinType(imageFile);
+
       if (!mounted) return;
-      
+
       final finalImage = imageFile;
-      
+
       Navigator.of(context).pop();
-      
+
       Get.to(
-        () => AnalysisProcessingScreen(imageCaptured: finalImage),
+            () => AnalysisProcessingScreen(imageCaptured: finalImage, skinType: skinType),
         transition: Transition.fadeIn,
         duration: const Duration(milliseconds: 300),
       );
-      
+
       widget.onImageCaptured(finalImage);
     } catch (e) {
       debugPrint("Error capturing: $e");
@@ -132,7 +135,7 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    
+
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: EdgeInsets.zero,
@@ -148,27 +151,27 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
               child: _isCameraInitialized
                   ? CameraPreview(_cameraController)
                   : Container(
-                      color: Colors.black,
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CircularProgressIndicator(
-                              color: EColors.dermPink,
-                              strokeWidth: 3,
-                            ),
-                            const SizedBox(height: 20),
-                            const Text(
-                              'Initializing camera...',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
+                color: Colors.black,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(
+                        color: EColors.dermPink,
+                        strokeWidth: 3,
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Initializing camera...',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
                         ),
                       ),
-                    ),
+                    ],
+                  ),
+                ),
+              ),
             ),
             Positioned(
               top: 0,
@@ -291,7 +294,7 @@ class _AnalyzerDialogState extends State<AnalyzerDialog> {
                             color: Colors.green,
                             border: Border.all(color: Colors.white, width: 4),
                           ),
-                          child: _isCapturing 
+                          child: _isCapturing
                               ? const CircularProgressIndicator(color: Colors.white)
                               : const Icon(Icons.camera_alt, color: Colors.white, size: 40),
                         ),

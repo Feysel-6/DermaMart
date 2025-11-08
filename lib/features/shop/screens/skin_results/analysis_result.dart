@@ -1,3 +1,4 @@
+
 import 'dart:io';
 
 import 'package:dermamart/features/shop/screens/home/home.dart';
@@ -11,9 +12,14 @@ import '../../../../utlis/constants/colors.dart';
 import 'package:flutter/services.dart';
 
 class AnalysisResultScreen extends StatefulWidget {
-  const AnalysisResultScreen({super.key, required this.imageCaptured});
+  const AnalysisResultScreen({
+    super.key,
+    required this.imageCaptured,
+    this.skinType,
+  });
 
   final File imageCaptured;
+  final String? skinType;
 
   @override
   State<AnalysisResultScreen> createState() => _AnalysisResultScreenState();
@@ -81,6 +87,15 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen>
           child: Column(
             children: [
               ImageDisplayer(imageCaptured: widget.imageCaptured),
+              if (widget.skinType != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Text(
+                    'Detected Skin Type: ${widget.skinType}',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               DietSummaryCard(
                 animationController: _animationController,
                 animation: _animation,
