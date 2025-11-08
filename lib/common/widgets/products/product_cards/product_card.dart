@@ -108,7 +108,7 @@ class EProductCard extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(left: 6),
-                      child: EProductPriceText(price: product.price as String,),
+                      child: EProductPriceText(price: '35.5 USD    ',),
                     ),
                     Container(
                       decoration: BoxDecoration(

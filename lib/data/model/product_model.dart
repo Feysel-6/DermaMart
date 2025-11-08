@@ -32,14 +32,6 @@ class ProductModel {
   factory ProductModel.fromMap(Map<String, dynamic> map) {
     double parseDouble(dynamic v) => v == null ? 0.0 : (v as num).toDouble();
 
-    List<String>? images;
-    if (map['images'] != null) {
-      images = List<String>.from(map['images'] as List);
-    } else if (map['product_images'] != null) {
-      images = (map['product_images'] as List)
-          .map((e) => e['url'] as String)
-          .toList();
-    }
 
     return ProductModel(
       id: map['id'] as String?,
@@ -47,7 +39,7 @@ class ProductModel {
       description: map['description'] as String?,
       price: parseDouble(map['price']),
       brand: map['brand']?.toString(),
-      image_path: images?.isNotEmpty == true ? images!.first : map['image_path'],
+      image_path: map['image_path'],
       skin_type: map['skin_type'] as String,
     );
   }
