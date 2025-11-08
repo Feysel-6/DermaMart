@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
+import '../../../../data/model/product_model.dart';
 import '../../../../features/shop/screens/product/product.dart';
 import '../../../../utlis/constants/colors.dart';
 import '../../../../utlis/constants/sizes.dart';
@@ -15,7 +16,9 @@ import '../../texts/product_price_text.dart';
 import '../../texts/product_title_text.dart';
 
 class EProductCard extends StatelessWidget {
-  const EProductCard({super.key});
+  const EProductCard({super.key, required this.product});
+
+  final ProductModel product;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +43,8 @@ class EProductCard extends StatelessWidget {
               child: Stack(
                 children: [
                   ERoundedImage(
-                    imageUrl: "assets/images/products/glycirin.png",
+                    imageUrl: product.image_path!,
+                    isNetworkImage: true,
                     height: 300,
                     width: 400,
                     applyImageRadius: true,
@@ -81,10 +85,10 @@ class EProductCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   EProductTitleText(
-                    title: 'Glycolic Acid 7% Exfoliating Toner | 23% Off in Slowvember',
+                    title: product.name,
                   ),
                   // SizedBox(height: ESizes.spaceBtwItems / 2),
-                  EBrandTitleWithVerifiedIcon(title: 'The Ordinary',),
+                  EBrandTitleWithVerifiedIcon(title: product.brand!,),
                 ],
               ),
             ),
@@ -104,7 +108,7 @@ class EProductCard extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(left: 6),
-                      child: EProductPriceText(price: '35.5 USD    ',),
+                      child: EProductPriceText(price: product.price as String,),
                     ),
                     Container(
                       decoration: BoxDecoration(

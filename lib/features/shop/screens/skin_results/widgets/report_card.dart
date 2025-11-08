@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import '../../../../../common/widgets/layout/grid_layout.dart';
 import '../../../../../common/widgets/products/product_cards/product_card.dart';
 import '../../../../../common/widgets/texts/section_heading.dart';
+import '../../../../../data/controller/product_controller.dart';
 import '../../../../../utlis/constants/fitness_app_theme.dart';
 import '../../all_products/all_products.dart';
 
@@ -79,6 +80,7 @@ class DietSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = ProductController.instance;
 
     return AnimatedBuilder(
       animation: animationController ?? const AlwaysStoppedAnimation(1.0),
@@ -764,10 +766,10 @@ class DietSummaryCard extends StatelessWidget {
                         title: 'Recommended Products',
                         onPressed: () => Get.to(() => const AllProducts()),
                       ),
-                      EGridLayout(
-                        itemCount: 4,
-                        itemBuilder: (_, index) => const EProductCard(),
-                      ),
+                      // EGridLayout(
+                      //   itemCount: 4,
+                      //   itemBuilder: (_, index) => const EProductCard(),
+                      // ),
                     ],
                   ),
                 ),

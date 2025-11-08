@@ -35,10 +35,10 @@ class ECategoryTab extends StatelessWidget {
               ),
               const SizedBox(height: ESizes.spaceBtwItems),
 
-              EGridLayout(
-                itemCount: 4,
-                itemBuilder: (_, index) => EProductCard(),
-              ),
+              // EGridLayout(
+              //   itemCount: 4,
+              //   itemBuilder: (_, index) => EProductCard(),
+              // ),
               SizedBox(height: ESizes.spaceBtwSections,)
             ],
           ),

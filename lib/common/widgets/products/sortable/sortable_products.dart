@@ -37,10 +37,10 @@ class ESortableProducts extends StatelessWidget {
               .toList(),
         ),
         const SizedBox(height: ESizes.spaceBtwSections),
-        EGridLayout(
-          itemCount: 4,
-          itemBuilder: (_, index) => EProductCard(),
-        ),
+        // EGridLayout(
+        //   itemCount: 4,
+        //   itemBuilder: (_, index) => EProductCard(),
+        // ),
       ],
     );
   }

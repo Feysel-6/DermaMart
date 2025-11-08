@@ -8,7 +8,9 @@ import '../../../../common/widgets/custom_shapes/containers/analyser_container.d
 import '../../../../common/widgets/custom_shapes/containers/primary_header_container.dart';
 import '../../../../common/widgets/layout/grid_layout.dart';
 import '../../../../common/widgets/products/product_cards/product_card.dart';
+import '../../../../common/widgets/shimmers/vertical_product_shimmer.dart';
 import '../../../../common/widgets/texts/section_heading.dart';
+import '../../../../data/controller/product_controller.dart';
 import '../../../../utlis/constants/colors.dart';
 import '../../../../utlis/constants/sizes.dart';
 import '../all_products/all_products.dart';
@@ -18,6 +20,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(ProductController());
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.transparent, // Transparent status bar
@@ -68,9 +71,20 @@ class HomeScreen extends StatelessWidget {
                     title: 'Popular Products',
                     onPressed: () => Get.to(() => const AllProducts()),
                   ),
-                  EGridLayout(
-                    itemCount: 4,
-                    itemBuilder: (_, index) => const EProductCard(),
+                  Obx(
+                          () {
+                        if (controller.isLoading.value) {
+                          return const EVerticalProductShimmer();
+                        }
+                        if (controller.featuredProducts.isEmpty) {
+                          return Center(child: Text('No products found!', style: Theme.of(context).textTheme.titleMedium,),);
+                        } else {
+                          return EGridLayout(
+                            itemCount: controller.featuredProducts.length,
+                            itemBuilder: (_, index) => EProductCard(product: controller.featuredProducts[index]),
+                          );
+                        }
+                      }
                   ),
                 ],
               ),

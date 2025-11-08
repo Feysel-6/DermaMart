@@ -32,10 +32,10 @@ class WishlistScreen extends StatelessWidget {
           padding: EdgeInsets.all(16),
           child: Column(
             children: [
-              EGridLayout(
-                itemCount: 6,
-                itemBuilder: (_, index) => EProductCard(),
-              ),
+              // EGridLayout(
+              //   itemCount: 6,
+              //   itemBuilder: (_, index) => EProductCard(),
+              // ),
             ],
           ),
         ),
