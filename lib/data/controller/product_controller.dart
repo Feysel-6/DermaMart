@@ -15,6 +15,7 @@ class ProductController extends GetxController {
   @override
   void onInit() {
     getFeaturedProducts();
+    getRecommendedProducts();
     super.onInit();
   }
 
@@ -30,10 +31,10 @@ class ProductController extends GetxController {
     }
   }
 
-  void getRecommendedProducts(String skinType) async {
+  void getRecommendedProducts() async {
     try {
       isLoading.value = true;
-      final products = await productRepository.fetchRecommendedProducts(skinType);
+      final products = await productRepository.fetchRecommendedProducts();
       recommendedProducts.assignAll(products);
     } catch (e) {
       throw Exception('Something went wrong: $e');

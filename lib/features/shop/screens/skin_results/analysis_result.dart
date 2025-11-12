@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dermamart/features/shop/screens/home/home.dart';
 import 'package:dermamart/features/shop/screens/skin_results/widgets/image_display.dart';
 import 'package:dermamart/features/shop/screens/skin_results/widgets/report_card.dart';
+import 'package:dermamart/navigation_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -82,7 +83,7 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen>
           IconButton(
             icon: const Icon(Icons.home),
             onPressed: () {
-              Get.to(() => HomeScreen());
+              Get.to(() => NavigationMenu());
             },
           ),
         ],
@@ -106,9 +107,6 @@ class _AnalysisResultScreenState extends State<AnalysisResultScreen>
                 animationController: _animationController,
                 animation: _animation,
               ),
-
-
-
             ],
           ),
         ),

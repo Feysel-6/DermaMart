@@ -26,9 +26,10 @@ class ProductRepository extends GetxController {
       throw Exception('Something went wrong: $e');
     }
   }
+
   Future<List<ProductModel>> fetchRecommendedProducts([String skinType = 'dry']) async {
     try {
-      final response = await _db.from('products').select().eq('skin', skinType);
+      final response = await _db.from('products').select().eq('skin_type', skinType).limit(10);
 
       final rows = response as List;
 
